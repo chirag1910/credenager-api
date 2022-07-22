@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
     },
     encrypted: {
         type: Boolean,
-        required: true,
+        default: true,
     },
     otp: {
         type: Number,

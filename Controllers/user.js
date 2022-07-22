@@ -68,7 +68,7 @@ const login = async (req, res) => {
             const token = generateToken(user._id);
 
             res.cookie("JWT_TOKEN", token, {
-                maxAge: JWT_SECRET,
+                maxAge: 2147483647,
                 httpOnly: true,
                 secure: true,
                 sameSite: "none",
@@ -113,6 +113,14 @@ const authGoogle = async (req, res) => {
             const user = await User.findOne({ email });
 
             if (!user) {
+                if (!key || typeof key !== "string") {
+                    return res.json({
+                        status: "error",
+                        code: 400,
+                        error: "Key is required",
+                    });
+                }
+
                 const password = await bcrypt.hash(generateRandomString(), 7);
                 const key = await bcrypt.hash(plainKey, 7);
 
@@ -297,6 +305,51 @@ const verifyKey = async (req, res) => {
     }
 };
 
+const resetKey = async (req, res) => {
+    const { userId, password, key: plainKey } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+
+        if (user) {
+            if (await bcrypt.compare(password, user.password)) {
+                const key = await bcrypt.hash(plainKey, 7);
+
+                await Group.deleteMany({ userId });
+                await Credential.deleteMany({ userId });
+
+                await user.updateOne({
+                    key,
+                });
+
+                return res.json({
+                    status: "ok",
+                    code: 200,
+                    message: "Key reset",
+                });
+            } else {
+                return res.json({
+                    status: "error",
+                    code: 401,
+                    error: "Incorrect password",
+                });
+            }
+        } else {
+            return res.json({
+                status: "error",
+                code: 404,
+                error: "User not found",
+            });
+        }
+    } catch (error) {
+        return res.json({
+            status: "error",
+            code: 500,
+            error: "Some error occurred",
+        });
+    }
+};
+
 const changePassword = async (req, res) => {
     const { userId, oldPassword, password: newPassword } = req.body;
 
@@ -364,27 +417,53 @@ const get = async (req, res) => {
             const groups = await Group.find({ userId });
             const credentials = await Credential.find({ userId });
 
-            const data = {
-                groups: [],
-            };
+            const data = [];
 
             for (let i = 0; i < groups.length; i++) {
                 let group = {
                     _id: groups[i]._id,
                     name: groups[i].name,
-                    credentials: [
-                        credentials.filter((c) => c.groupId === groups[i]._id),
-                    ],
+                    credentials: credentials.filter(
+                        (c) => c.groupId === groups[i]._id
+                    ),
                 };
 
-                data.groups.push(group);
+                data.push(group);
             }
 
-            data.groups.push({
-                _id: null,
-                name: null,
-                credentials: [credentials.filter((c) => c.groupId == null)],
-            });
+            const nullGroupCredentials = credentials.filter(
+                (c) => c.groupId == null
+            );
+
+            if (nullGroupCredentials.length) {
+                data.push({
+                    _id: null,
+                    name: null,
+                    credentials: nullGroupCredentials,
+                });
+            }
+
+            // const data = await Credential.aggregate([
+            //     {
+            //         $group: {
+            //             _id: { groupId: "$groupId" },
+            //         },
+            //     },
+            // ]);
+
+            // const data = await Credential.aggregate([
+            //     {
+            //         $group: { _id: { groupId: "$groupId" } },
+            //     },
+            //     {
+            //         $lookup: {
+            //             from: "Group",
+            //             localField: "_id",
+            //             foreignField: "groupId",
+            //             as: "groups",
+            //         },
+            //     },
+            // ]);
 
             return res.json({
                 status: "ok",
@@ -461,6 +540,7 @@ module.exports = {
     resetPasswordInit,
     resetPassword,
     verifyKey,
+    resetKey,
     changePassword,
     logout,
     get,

@@ -14,7 +14,7 @@ const emailValidator = (req, res, next) => {
 const passwordValidator = (req, res, next) => {
     const { password } = req.body;
 
-    if (!password) {
+    if (!password || typeof password !== "string") {
         return res.json({
             status: "error",
             code: 400,
@@ -41,7 +41,7 @@ const passwordValidator = (req, res, next) => {
 const keyValidator = (req, res, next) => {
     const { key } = req.body;
 
-    if (!key) {
+    if (!key || typeof key !== "string") {
         return res.json({
             status: "error",
             code: 400,
@@ -61,16 +61,17 @@ const otpValidator = (req, res, next) => {
             error: "OTP is required",
         });
     }
+    next();
 };
 
 const oldPasswordValidator = (req, res, next) => {
     const { oldPassword } = req.body;
 
-    if (!oldPassword) {
+    if (!oldPassword || typeof oldPassword !== "string") {
         return res.json({
             status: "error",
             code: 400,
-            error: "Password is required",
+            error: "Old Password is required",
         });
     }
     if (oldPassword.length < 8) {
