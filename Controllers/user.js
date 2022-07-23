@@ -414,63 +414,42 @@ const get = async (req, res) => {
         const user = await User.findById(userId);
 
         if (user) {
-            const groups = await Group.find({ userId });
-            const credentials = await Credential.find({ userId });
+            const data = await Group.aggregate([
+                {
+                    $project: { _id: 1, name: 1 },
+                },
+                {
+                    $lookup: {
+                        from: "credentials",
+                        localField: "_id",
+                        foreignField: "groupId",
+                        pipeline: [
+                            { $project: { _id: 1, identifier: 1, value: 1 } },
+                        ],
+                        as: "credentials",
+                    },
+                },
+            ]);
 
-            const data = [];
-
-            for (let i = 0; i < groups.length; i++) {
-                let group = {
-                    _id: groups[i]._id,
-                    name: groups[i].name,
-                    credentials: credentials.filter(
-                        (c) => c.groupId === groups[i]._id
-                    ),
-                };
-
-                data.push(group);
-            }
-
-            const nullGroupCredentials = credentials.filter(
-                (c) => c.groupId == null
-            );
-
-            if (nullGroupCredentials.length) {
-                data.push({
-                    _id: null,
-                    name: null,
-                    credentials: nullGroupCredentials,
-                });
-            }
-
-            // const data = await Credential.aggregate([
-            //     {
-            //         $group: {
-            //             _id: { groupId: "$groupId" },
-            //         },
-            //     },
-            // ]);
-
-            // const data = await Credential.aggregate([
-            //     {
-            //         $group: { _id: { groupId: "$groupId" } },
-            //     },
-            //     {
-            //         $lookup: {
-            //             from: "Group",
-            //             localField: "_id",
-            //             foreignField: "groupId",
-            //             as: "groups",
-            //         },
-            //     },
-            // ]);
+            data.push({
+                _id: null,
+                name: null,
+                credentials: await Credential.find(
+                    {
+                        $or: [
+                            { groupId: null },
+                            { groupId: { $exists: false } },
+                        ],
+                    },
+                    "_id identifier value"
+                ),
+            });
 
             return res.json({
                 status: "ok",
                 code: 200,
                 message: "Details fetched",
                 userID: user._id,
-                name: user.name,
                 email: user.email,
                 data,
             });

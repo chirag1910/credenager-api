@@ -10,6 +10,7 @@ const {
 const {
     create,
     update,
+    updateGroup,
     deleteCredential,
 } = require("../Controllers/credential");
 
@@ -21,6 +22,7 @@ router.post(
     credentialIdValidator,
     update
 );
+router.post("/update/group", auth, credentialIdValidator, updateGroup);
 router.post("/delete", auth, credentialIdValidator, deleteCredential);
 
 module.exports = router;

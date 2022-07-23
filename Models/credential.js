@@ -10,6 +10,7 @@ const credentialSchema = new mongoose.Schema({
     groupId: {
         type: Schema.ObjectId,
         ref: "Group",
+        default: null,
     },
     identifier: {
         type: String,

@@ -5,7 +5,7 @@ const nameValidator = (req, res, next) => {
         return res.json({
             status: "error",
             code: 400,
-            error: "Name is required",
+            error: "Group name is required",
         });
     }
     next();
