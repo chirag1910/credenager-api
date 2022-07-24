@@ -269,6 +269,14 @@ const resetPassword = async (req, res) => {
     }
 };
 
+const verifyUser = async (req, res) => {
+    return res.json({
+        status: "ok",
+        code: 200,
+        message: "User authorized",
+    });
+};
+
 const verifyKey = async (req, res) => {
     const { key, userId } = req.body;
 
@@ -518,6 +526,7 @@ module.exports = {
     authGoogle,
     resetPasswordInit,
     resetPassword,
+    verifyUser,
     verifyKey,
     resetKey,
     changePassword,

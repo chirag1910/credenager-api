@@ -16,6 +16,7 @@ const {
     authGoogle,
     resetPasswordInit,
     resetPassword,
+    verifyUser,
     verifyKey,
     resetKey,
     changePassword,
@@ -35,6 +36,7 @@ router.post(
     otpValidator,
     resetPassword
 );
+router.post("/verify", auth, verifyUser);
 router.post("/verify/key", auth, keyValidator, verifyKey);
 router.post("/reset/key", auth, passwordValidator, keyValidator, resetKey);
 router.post(
