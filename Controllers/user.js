@@ -113,7 +113,7 @@ const authGoogle = async (req, res) => {
             const user = await User.findOne({ email });
 
             if (!user) {
-                if (!key || typeof key !== "string") {
+                if (!plainKey || typeof plainKey !== "string") {
                     return res.json({
                         status: "error",
                         code: 400,
