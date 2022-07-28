@@ -300,14 +300,6 @@ const resetPassword = async (req, res) => {
     }
 };
 
-const verifyUser = async (req, res) => {
-    return res.json({
-        status: "ok",
-        code: 200,
-        message: "User authorized",
-    });
-};
-
 const verifyKey = async (req, res) => {
     const { key, userId } = req.body;
 
@@ -446,6 +438,36 @@ const logout = async (req, res) => {
     });
 };
 
+const getBasic = async (req, res) => {
+    const { userId } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+
+        if (user) {
+            return res.json({
+                status: "ok",
+                code: 200,
+                message: "Details fetched",
+                userID: user._id,
+                email: user.email,
+            });
+        } else {
+            return res.json({
+                status: "error",
+                code: 404,
+                error: "User not found",
+            });
+        }
+    } catch (error) {
+        return res.json({
+            status: "error",
+            code: 500,
+            error: "Some error occurred",
+        });
+    }
+};
+
 const get = async (req, res) => {
     const { userId } = req.body;
 
@@ -558,11 +580,11 @@ module.exports = {
     loginGoogle,
     resetPasswordInit,
     resetPassword,
-    verifyUser,
     verifyKey,
     resetKey,
     changePassword,
     logout,
+    getBasic,
     get,
     deleteUser,
 };
