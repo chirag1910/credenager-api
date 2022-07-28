@@ -13,7 +13,8 @@ const {
 const {
     signup,
     login,
-    authGoogle,
+    signupGoogle,
+    loginGoogle,
     resetPasswordInit,
     resetPassword,
     verifyUser,
@@ -27,7 +28,8 @@ const {
 
 router.post("/signup", emailValidator, passwordValidator, keyValidator, signup);
 router.post("/login", emailValidator, passwordValidator, login);
-router.post("/auth/google", authGoogle);
+router.post("/signup/google", keyValidator, signupGoogle);
+router.post("/login/google", loginGoogle);
 router.post("/reset/password/init", emailValidator, resetPasswordInit);
 router.post(
     "/reset/password",

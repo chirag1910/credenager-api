@@ -98,7 +98,7 @@ const login = async (req, res) => {
     }
 };
 
-const authGoogle = async (req, res) => {
+const signupGoogle = async (req, res) => {
     const { googleToken, key: plainKey } = req.body;
 
     try {
@@ -113,14 +113,6 @@ const authGoogle = async (req, res) => {
             const user = await User.findOne({ email });
 
             if (!user) {
-                if (!plainKey || typeof plainKey !== "string") {
-                    return res.json({
-                        status: "error",
-                        code: 400,
-                        error: "Key is required",
-                    });
-                }
-
                 const password = await bcrypt.hash(generateRandomString(), 7);
                 const key = await bcrypt.hash(plainKey, 7);
 
@@ -147,6 +139,39 @@ const authGoogle = async (req, res) => {
                     token,
                 });
             } else {
+                return res.json({
+                    status: "error",
+                    code: 409,
+                    error: "Email already exists",
+                });
+            }
+        } catch (error) {
+            return res.json({
+                status: "error",
+                code: 500,
+                error: "Some error occurred",
+            });
+        }
+    } catch (error) {
+        return res.json({ status: "error", code: 401, error: "Invalid token" });
+    }
+};
+
+const loginGoogle = async (req, res) => {
+    const { googleToken } = req.body;
+
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: googleToken,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const { email } = ticket.getPayload();
+
+        try {
+            const user = await User.findOne({ email });
+
+            if (user) {
                 const token = generateToken(user._id);
 
                 res.cookie("JWT_TOKEN", token, {
@@ -163,6 +188,12 @@ const authGoogle = async (req, res) => {
                     _id: user._id,
                     email: user.email,
                     token,
+                });
+            } else {
+                return res.json({
+                    status: "error",
+                    code: 401,
+                    error: "Email doesn't exists",
                 });
             }
         } catch (error) {
@@ -523,7 +554,8 @@ const deleteUser = async (req, res) => {
 module.exports = {
     signup,
     login,
-    authGoogle,
+    signupGoogle,
+    loginGoogle,
     resetPasswordInit,
     resetPassword,
     verifyUser,
