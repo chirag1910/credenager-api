@@ -477,6 +477,9 @@ const get = async (req, res) => {
         if (user) {
             const data = await Group.aggregate([
                 {
+                    $match: { userId: user._id },
+                },
+                {
                     $project: { _id: 1, name: 1 },
                 },
                 {
@@ -497,9 +500,14 @@ const get = async (req, res) => {
                 name: null,
                 credentials: await Credential.find(
                     {
-                        $or: [
-                            { groupId: null },
-                            { groupId: { $exists: false } },
+                        $and: [
+                            { userId: user._id },
+                            {
+                                $or: [
+                                    { groupId: null },
+                                    { groupId: { $exists: false } },
+                                ],
+                            },
                         ],
                     },
                     "_id identifier value"
