@@ -1,4 +1,5 @@
 const Group = require("../Models/group");
+const Credential = require("../Models/credential");
 
 const create = async (req, res) => {
     const { name, userId } = req.body;
@@ -75,6 +76,7 @@ const deleteGroup = async (req, res) => {
         const group = await Group.findById(_id);
 
         if (group) {
+            await Credential.deleteMany({ groupId: _id });
             await group.remove();
 
             return res.json({
