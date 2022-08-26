@@ -32,7 +32,7 @@ const send = async (mailTo, otp) => {
                 Credenager
             </p>
         </div>
-    </div
+    </div>
     `;
 
     const mailOptions = {
