@@ -5,7 +5,7 @@ const create = async (req, res) => {
     const { name, userId } = req.body;
 
     try {
-        const group = await Group.findOne({ name });
+        const group = await Group.findOne({ name, userId });
 
         if (!group) {
             const group = await Group.create({
