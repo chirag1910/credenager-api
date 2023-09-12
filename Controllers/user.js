@@ -28,7 +28,7 @@ const signup = async (req, res) => {
             const token = generateToken(user._id);
 
             res.cookie("JWT_TOKEN", token, {
-                maxAge: 2147483647,
+                maxAge: process.env.AUTH_EXPIRE_DAYS * 24 * 60 * 60 * 1000,
                 httpOnly: true,
                 secure: true,
                 sameSite: "none",
@@ -68,7 +68,7 @@ const login = async (req, res) => {
             const token = generateToken(user._id);
 
             res.cookie("JWT_TOKEN", token, {
-                maxAge: 2147483647,
+                maxAge: process.env.AUTH_EXPIRE_DAYS * 24 * 60 * 60 * 1000,
                 httpOnly: true,
                 secure: true,
                 sameSite: "none",
@@ -124,7 +124,7 @@ const signupGoogle = async (req, res) => {
                 const token = generateToken(user._id);
 
                 res.cookie("JWT_TOKEN", token, {
-                    maxAge: 2147483647,
+                    maxAge: process.env.AUTH_EXPIRE_DAYS * 24 * 60 * 60 * 1000,
                     httpOnly: true,
                     secure: true,
                     sameSite: "none",
@@ -175,7 +175,7 @@ const loginGoogle = async (req, res) => {
                 const token = generateToken(user._id);
 
                 res.cookie("JWT_TOKEN", token, {
-                    maxAge: 2147483647,
+                    maxAge: process.env.AUTH_EXPIRE_DAYS * 24 * 60 * 60 * 1000,
                     httpOnly: true,
                     secure: true,
                     sameSite: "none",
